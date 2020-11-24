@@ -183,7 +183,7 @@ class AuthApi
      */
     public function info($email) : ?array
     {
-        $data = $this->provider->request($this->api , 'get','api/info', ['email' => $email,]);
+        $data = $this->provider->request($this->api , 'post','api/info', ['email' => $email]);
 
         if(is_array($data))
         {
