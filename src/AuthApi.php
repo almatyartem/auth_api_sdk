@@ -175,4 +175,21 @@ class AuthApi
 
         return null;
     }
+
+    /**
+     * @param $email
+     * @return array|null
+     * @throws RequestProviderException
+     */
+    public function info($email) : ?array
+    {
+        $data = $this->provider->request($this->api , 'get','api/info', ['email' => $email,]);
+
+        if(is_array($data))
+        {
+            return $data;
+        }
+
+        return null;
+    }
 }
