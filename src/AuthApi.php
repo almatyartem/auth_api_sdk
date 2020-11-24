@@ -62,26 +62,23 @@ class AuthApi
     /**
      * @param $code
      * @return string|null
+     * @throws RequestProviderException
      */
     public function getClientToken($code) : ?string
     {
-        try
+        $data = $this->provider->request($this->api , 'post','oauth/token',  [
+            'grant_type' => 'authorization_code',
+            'client_id' => $this->clientId,
+            'client_secret' => $this->clientSecret,
+            'redirect_uri' => $this->oauthCallback,
+            'code' => $code,
+        ], []);
+
+
+        if($data and isset($data['access_token']) and $data['access_token'])
         {
-            $data = $this->provider->request($this->api , 'post','oauth/token',  [
-                'grant_type' => 'authorization_code',
-                'client_id' => $this->clientId,
-                'client_secret' => $this->clientSecret,
-                'redirect_uri' => $this->oauthCallback,
-                'code' => $code,
-            ], []);
-
-
-            if($data and isset($data['access_token']) and $data['access_token'])
-            {
-                return $data['access_token'];
-            }
+            return $data['access_token'];
         }
-        catch(RequestProviderException $exception){}
 
         return null;
     }
@@ -90,21 +87,18 @@ class AuthApi
      * @param $email
      * @param $password
      * @return string|null
+     * @throws RequestProviderException
      */
     public function getClientTokenByAuth($email, $password) : ?string
     {
-        try
-        {
-            $data = $this->provider->request($this->api,'post','oauth/token',  [
-                'grant_type' => 'password',
-                'client_id' => $this->clientId,
-                'client_secret' => $this->clientSecret,
-                'username' => $email,
-                'password' => $password,
-                'scope' => '',
-            ]);
-        }
-        catch(RequestProviderException $exception){}
+        $data = $this->provider->request($this->api,'post','oauth/token',  [
+            'grant_type' => 'password',
+            'client_id' => $this->clientId,
+            'client_secret' => $this->clientSecret,
+            'username' => $email,
+            'password' => $password,
+            'scope' => '',
+        ]);
 
         if($data and isset($data['access_token']) and $data['access_token'])
         {
@@ -116,22 +110,19 @@ class AuthApi
 
     /**
      * @param $token
-     * @return mixed
+     * @return array|null
+     * @throws RequestProviderException
      */
     public function getUserByToken($token) : ?array
     {
-        try
-        {
-            $data = $this->provider->request($this->api, 'get','api/user?env='.$this->env.'&app='.$this->app,  [], [
-                'Authorization' => 'Bearer ' .$token
-            ]);
+        $data = $this->provider->request($this->api, 'get','api/user?env='.$this->env.'&app='.$this->app,  [], [
+            'Authorization' => 'Bearer ' .$token
+        ]);
 
-            if(is_array($data))
-            {
-                return $data;
-            }
+        if(is_array($data))
+        {
+            return $data;
         }
-        catch(RequestProviderException $exception){}
 
         return null;
     }
@@ -142,25 +133,22 @@ class AuthApi
      * @param null $email
      * @param null $password
      * @return array|null
+     * @throws RequestProviderException
      */
     public function editUserByToken($token, $name = null, $email = null, $password = null) : ?array
     {
-        try
-        {
-            $data = $this->provider->request($this->api , 'post','api/user', [
-                'name' => $name,
-                'email' => $email,
-                'password' => $password
-            ], [
-                'Authorization' => 'Bearer ' .$token
-            ]);
+        $data = $this->provider->request($this->api , 'post','api/user', [
+            'name' => $name,
+            'email' => $email,
+            'password' => $password
+        ], [
+            'Authorization' => 'Bearer ' .$token
+        ]);
 
-            if(is_array($data))
-            {
-                return $data;
-            }
+        if(is_array($data))
+        {
+            return $data;
         }
-        catch(RequestProviderException $exception){}
 
         return null;
     }
@@ -170,23 +158,20 @@ class AuthApi
      * @param $name
      * @param $password
      * @return array|null
+     * @throws RequestProviderException
      */
     public function createUser($email, $name, $password) : ?array
     {
-        try
-        {
-            $data = $this->provider->request($this->api , 'post','api/register', [
-                'email' => $email,
-                'name' => $name,
-                'password' => $password
-            ]);
+        $data = $this->provider->request($this->api , 'post','api/register', [
+            'email' => $email,
+            'name' => $name,
+            'password' => $password
+        ]);
 
-            if(is_array($data))
-            {
-                return $data;
-            }
+        if(is_array($data))
+        {
+            return $data;
         }
-        catch(RequestProviderException $exception){}
 
         return null;
     }

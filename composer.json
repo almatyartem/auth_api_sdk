@@ -10,8 +10,7 @@
   "require": {
     "php": ">=7.1",
     "ext-json": "*",
-    "apisdk/request_providers": "dev-master",
-    "illuminate/support": "*"
+    "apisdk/request_providers": "dev-master"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
