@@ -192,4 +192,45 @@ class AuthApi
 
         return null;
     }
+
+    /**
+     * @param $email
+     * @return string|null
+     * @throws RequestProviderException
+     */
+    public function getResetPasswordToken($email) : ?string
+    {
+        $data = $this->provider->request($this->api , 'post','api/reset_password_token', ['email' => $email]);
+
+        if(is_array($data) and isset($data['token']))
+        {
+            return $data['token'];
+        }
+
+        return null;
+    }
+
+    /**
+     * @param $email
+     * @param $password
+     * @param $token
+     * @return bool
+     * @throws RequestProviderException
+     */
+    public function resetPassword($email, $password, $token) : bool
+    {
+        $data = $this->provider->request($this->api , 'post','api/reset_password', [
+            'email' => $email,
+            'password' => $password,
+            'password_confirmation' => $password,
+            'token' => $token,
+        ]);
+
+        if(is_array($data) and isset($data['success']))
+        {
+            return $data['success'];
+        }
+
+        return false;
+    }
 }
