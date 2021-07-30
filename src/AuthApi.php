@@ -2,41 +2,40 @@
 
 namespace ApiSdk;
 
-use ApiSdk\Contracts\RequestProvider;
+use RpContracts\RequestProvider;
+use RpContracts\Response;
 
 class AuthApi
 {
     /**
      * @var RequestProvider
      */
-    public $provider;
-
-    public $api;
+    public RequestProvider $provider;
 
     /**
      * @var string
      */
-    protected $clientId;
+    protected string $clientId;
 
     /**
      * @var string
      */
-    protected $clientSecret;
+    protected string $clientSecret;
 
     /**
      * @var string
      */
-    protected $oauthCallback;
+    protected string $oauthCallback;
 
     /**
      * @var string
      */
-    public $env;
+    public string $env;
 
     /**
      * @var string
      */
-    public $app;
+    public string $app;
 
     /**
      * AuthApi constructor.
@@ -46,9 +45,8 @@ class AuthApi
      * @param string $oauthCallback
      * @param string $env
      * @param string $app
-     * @param null $api
      */
-    public function __construct(RequestProvider $provider, string $clientId, string $clientSecret, string $oauthCallback, string $env, string $app, $api = null)
+    public function __construct(RequestProvider $provider, string $clientId, string $clientSecret, string $oauthCallback, string $env, string $app)
     {
         $this->provider = $provider;
         $this->clientId = $clientId;
@@ -56,23 +54,21 @@ class AuthApi
         $this->oauthCallback = $oauthCallback;
         $this->env = $env;
         $this->app = $app;
-        $this->api = $api ?? 'auth';
     }
 
     /**
      * @param $code
      * @return string|null
-     * @throws RequestProviderException
      */
     public function getClientToken($code) : ?string
     {
-        $data = $this->provider->request($this->api , 'post','oauth/token',  [
+        $data = $this->provider->request('oauth/token', 'post',  [
             'grant_type' => 'authorization_code',
             'client_id' => $this->clientId,
             'client_secret' => $this->clientSecret,
             'redirect_uri' => $this->oauthCallback,
             'code' => $code,
-        ], []);
+        ])->getContents();
 
 
         if($data and isset($data['access_token']) and $data['access_token'])
@@ -87,18 +83,17 @@ class AuthApi
      * @param $email
      * @param $password
      * @return string|null
-     * @throws RequestProviderException
      */
     public function getClientTokenByAuth($email, $password) : ?string
     {
-        $data = $this->provider->request($this->api,'post','oauth/token',  [
+        $data = $this->provider->request('oauth/token','post',  [
             'grant_type' => 'password',
             'client_id' => $this->clientId,
             'client_secret' => $this->clientSecret,
             'username' => $email,
             'password' => $password,
             'scope' => '',
-        ]);
+        ])->getContents();
 
         if($data and isset($data['access_token']) and $data['access_token'])
         {
@@ -111,13 +106,12 @@ class AuthApi
     /**
      * @param $token
      * @return array|null
-     * @throws RequestProviderException
      */
     public function getUserByToken($token) : ?array
     {
-        $data = $this->provider->request($this->api, 'get','api/user?env='.$this->env.'&app='.$this->app,  [], [
+        $data = $this->provider->request('api/user?env='.$this->env.'&app='.$this->app, 'get',  [], [
             'Authorization' => 'Bearer ' .$token
-        ]);
+        ])->getContents();
 
         if(is_array($data))
         {
@@ -133,17 +127,16 @@ class AuthApi
      * @param null $email
      * @param null $password
      * @return array|null
-     * @throws RequestProviderException
      */
     public function editUserByToken($token, $name = null, $email = null, $password = null) : ?array
     {
-        $data = $this->provider->request($this->api , 'post','api/user', [
+        $data = $this->provider->request('api/user', 'post', [
             'name' => $name,
             'email' => $email,
             'password' => $password
         ], [
             'Authorization' => 'Bearer ' .$token
-        ]);
+        ])->getContents();
 
         if(is_array($data))
         {
@@ -158,15 +151,14 @@ class AuthApi
      * @param $name
      * @param $password
      * @return array|null
-     * @throws RequestProviderException
      */
     public function createUser($email, $name, $password) : ?array
     {
-        $data = $this->provider->request($this->api , 'post','api/register', [
+        $data = $this->provider->request('api/register', 'post', [
             'email' => $email,
             'name' => $name,
             'password' => $password
-        ]);
+        ])->getContents();
 
         if(is_array($data))
         {
@@ -179,11 +171,10 @@ class AuthApi
     /**
      * @param $email
      * @return array|null
-     * @throws RequestProviderException
      */
     public function info($email) : ?array
     {
-        $data = $this->provider->request($this->api , 'post','api/info', ['email' => $email]);
+        $data = $this->provider->request('api/info', 'post', ['email' => $email])->getContents();
 
         if(is_array($data))
         {
@@ -196,11 +187,10 @@ class AuthApi
     /**
      * @param $email
      * @return string|null
-     * @throws RequestProviderException
      */
     public function getResetPasswordToken($email) : ?string
     {
-        $data = $this->provider->request($this->api , 'post','api/reset_password_token', ['email' => $email]);
+        $data = $this->provider->request('api/reset_password_token','post', ['email' => $email])->getContents();
 
         if(is_array($data) and isset($data['token']))
         {
@@ -215,16 +205,15 @@ class AuthApi
      * @param $password
      * @param $token
      * @return bool
-     * @throws RequestProviderException
      */
     public function resetPassword($email, $password, $token) : bool
     {
-        $data = $this->provider->request($this->api , 'post','api/reset_password', [
+        $data = $this->provider->request('api/reset_password', 'post', [
             'email' => $email,
             'password' => $password,
             'password_confirmation' => $password,
             'token' => $token,
-        ]);
+        ])->getContents();
 
         if(is_array($data) and isset($data['success']))
         {
